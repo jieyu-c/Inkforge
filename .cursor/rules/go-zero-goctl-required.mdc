@@ -1,0 +1,32 @@
+---
+description: go-zero — api/rpc/model 须用 goctl 生成（提示词明示非 go-zero 例外除外）
+alwaysApply: true
+---
+
+# go-zero：`goctl` 优先（默认禁止手搓脚手架）
+
+当工作栈为 **go-zero**（zeromicro）时，**必须先走 goctl**，用生成物作为基础，**禁止**徒手实现与 goctl 等价的 **`api` / `rpc` / `model` 脚手架**（典型包括由 `.api`/`.proto`/DDL 衍生的 handler、routes、logic 壳、`types`、`svc`、`config`、`model`、`*.pb.go`、goctl model 生成的 CRUD 等）。
+
+## 允许的例外（仅此一种）
+
+只有当**用户在当前提示词中明确写出**：某一部分要采用 **go-zero/goctl 之外的**技术或实现方式时，才对该**已点名的部分**允许手写或非 goctl 实现；**未点名的路径**仍需用 `goctl` 生成并与之对齐。
+
+> 含糊表述（例如「手写优化一下」但未说明替代技术栈/范围）**不构成**豁免理由；应先按 goctl 生成，再与用户确认是否要引入例外。
+
+## 推荐顺序（摘录）
+
+```bash
+# REST：先有 .api，再校验与生成
+goctl api validate --api path/to/spec.api
+goctl api go --api path/to/spec.api --dir path/to/service --style go_zero
+
+# RPC：先有 .proto
+goctl rpc protoc xxx.proto ...
+
+# Model：先有 DDL/sql
+goctl model mysql ddl -src ...
+
+go mod tidy && go build ./...
+```
+
+在非豁免代码上：**改业务应主要落在 logic / 手写扩展包内**，而不要复制一套「伪 go-zero」目录结构与样板。

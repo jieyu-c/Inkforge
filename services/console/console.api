@@ -1,0 +1,75 @@
+syntax = "v1"
+
+info (
+	title:   "Inkforge Console API"
+	desc:    "Console authentication (phone + password)"
+	version: "v1"
+)
+
+type JwtAuth {}
+
+type RegisterReq {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+}
+
+type RegisterResp {
+	Message string `json:"message"`
+}
+
+type LoginReq {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+}
+
+type LoginResp {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int64  `json:"expires_in"`
+}
+
+type RefreshResp {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int64  `json:"expires_in"`
+}
+
+type Empty {}
+
+type MeResp {
+	UserID string `json:"user_id"`
+	Phone  string `json:"phone"`
+}
+
+type ErrorBody {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+@server (
+	prefix:     /api/v1/auth
+	group:      auth
+	middleware: AuthRateLimit
+)
+service console-api {
+	@handler Register
+	post /register (RegisterReq) returns (RegisterResp)
+
+	@handler Login
+	post /login (LoginReq) returns (LoginResp)
+
+	@handler Refresh
+	post /refresh returns (RefreshResp)
+
+	@handler Logout
+	post /logout returns (Empty)
+}
+
+@server (
+	prefix: /api/v1
+	group:  user
+	jwt:    JwtAuth
+)
+service console-api {
+	@handler Me
+	get /me returns (MeResp)
+}
+

@@ -1,0 +1,32 @@
+---
+description: Inkforge — goctl 代码生成必须使用 go_zero 风格
+alwaysApply: true
+---
+
+# goctl：`--style go_zero`
+
+在本仓库生成或覆盖 go-zero 脚手架时，`goctl` **必须**带 `--style go_zero`（与默认 `gozero` 文件名风格区分）。
+
+**目录约定**：保持 `goctl` 生成的 `handler/`、`logic/`、`types/`、`svc/`、`config/` 及根目录 `console.go` 的布局；可复用的底层能力（错误码、JWT/Cookie 工具、仓储、限流等）放在 **`internal/pkg/<包>/`**，**文件名蛇形**（如 `jwt_issue.go`、`user_repository.go`）；**业务编排与用例流程写在 `internal/logic/`**。
+
+## Console 约定（Inkforge）
+
+- **`internal/handler/**`**：与 goctl 一致，仅 `parse → New*Logic → logic`。
+- **`internal/logic/**`**：编写具体业务（鉴权、会话、限流判断等）；可通过 **`internal/pkg/requestscope`** 从 `ctx` 取到 `ResponseWriter` 与 `*http.Request`（需配合 `main` 里 `server.Use(requestscope.Middleware)`）。
+- **`internal/pkg/**`**：不包含完整用例流程，只放可复用的小库与中间件支撑。
+
+## 示例
+
+```bash
+# REST（.api）
+goctl api go --api services/console/console.api --dir services/console --style go_zero
+
+# 其他 goctl `go` 子命令同样在支持 `--style` 时使用 go_zero，保持与生成的 handler/logic 目录命名一致。
+```
+
+## 不要做
+
+```bash
+# ❌ 省略 --style 或误用默认 gozero（除非刻意对齐旧分支，本仓库不适用）
+goctl api go --api ./foo.api --dir .
+```

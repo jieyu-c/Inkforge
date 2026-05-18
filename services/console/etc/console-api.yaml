@@ -1,0 +1,37 @@
+Name: console-api
+Host: 0.0.0.0
+Port: 8888
+Mode: dev
+Timeout: 30000
+
+Mysql:
+  DataSource: inkforge:inkforge@tcp(127.0.0.1:3306)/inkforge?parseTime=true&loc=UTC&charset=utf8mb4
+
+Redis:
+  Host: 127.0.0.1:6379
+  Type: node
+
+JwtAuth:
+  AccessSecret: dev-console-jwt-change-in-production-at-least-32bytesLONG!
+  AccessExpire: 900
+
+Auth:
+  PublicBaseURL: http://localhost:8888
+  RefreshTTLSeconds: 604800
+  RefreshCookieName: jf_refresh
+  RefreshCookiePath: /api/v1/auth
+  RefreshCookieSecure: false
+  RefreshCookieSameSiteStrict: false
+  BcryptCost: 10
+  LockFailures: 8
+  LockDurationMinutes: 15
+  MinPasswordLength: 10
+  ResetTokenTTLMinutes: 30
+  ForgotPasswordThrottleSeconds: 60
+  SAMLAssertionMaxAgeMinutes: 5
+
+RateLimit:
+  AuthIPRequestsPerMinute: 30
+  AuthIPBurst: 60
+  AuthPhoneRequestsPerMinute: 10
+  AuthPhoneBurst: 20
