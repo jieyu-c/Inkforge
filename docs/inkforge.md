@@ -4,7 +4,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 文档版本 | v1.3 |
+| 文档版本 | v1.5 |
 | 文档状态 | Draft（立项评审用） |
 | 产品中文名 | 介墨（寓意：执笔成篇，墨色可版本化、可追溯） |
 | 英文代号 / Repo 建议 | JieInkforge（Jie-yuc → Jie；Ink + Forge → 工坊/锻造基建） |
@@ -21,6 +21,8 @@
 | v1.1 | 2026-05-18 | 重组为完整 PRD：文档头、背景与指标、范围边界、REQ-ID、验收标准、IA、架构示意；移除无效 YAML |
 | v1.2 | 2026-05-18 | 记录服务端框架选型：**go-zero** |
 | v1.3 | 2026-05-18 | 控制台登录专题拆至 [docs/prd-auth-console.md](prd-auth-console.md)，主文档第四节保留 REQ 摘要 |
+| v1.4 | 2026-05-19 | 命名空间专题拆至 [docs/prd-namespace.md](prd-namespace.md)，主文档第五节保留 REQ 摘要 |
+| v1.5 | 2026-05-19 | Prompt 专题拆至 [docs/prd-prompt.md](prd-prompt.md)（第七节导读）；命名空间文档 v0.3 收口与任务分工见对应 plan |
 
 ---
 
@@ -291,6 +293,8 @@ flowchart TB
 
 ## 五、命名空间（NS）
 
+细则（生命周期、隔离与配额、NS 成员、控制台上下文、审计与 API 占位、go-zero 衔接）见专题文档：[docs/prd-namespace.md](prd-namespace.md)。本节保留 REQ 摘要以便总览。
+
 | REQ-ID | 需求描述 | 优先级 |
 |--------|----------|--------|
 | NS-001 | 租户下 **创建 / 归档 / 恢复** NS；归档后禁止新发布；读可按策略只读 | P0 |
@@ -335,6 +339,8 @@ flowchart TB
 ---
 
 ## 七、Prompt 管理（PRM）
+
+细则（内容与版本维护、Console 管理 API、与命名空间归档/配额交集）见专题文档：[docs/prd-prompt.md](prd-prompt.md)。本节保留 REQ 摘要以便总览。
 
 ### 7.1 实体模型（摘要）
 
