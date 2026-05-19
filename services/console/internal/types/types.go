@@ -3,6 +3,15 @@
 
 package types
 
+type CreateNamespaceReq struct {
+	NsSlug             string   `json:"ns_slug"`
+	DisplayName        string   `json:"display_name"`
+	Description        string   `json:"description,optional"`
+	DefaultChannelSlug string   `json:"default_channel_slug,optional"`
+	Tags               []string `json:"tags,optional"`
+	QuotaPromptsMax    int64    `json:"quota_prompts_max,optional"`
+}
+
 type Empty struct {
 }
 
@@ -27,6 +36,30 @@ type LoginResp struct {
 type MeResp struct {
 	UserID string `json:"user_id"`
 	Phone  string `json:"phone"`
+}
+
+type NamespaceDetail struct {
+	NsSlug             string   `json:"ns_slug"`
+	DisplayName        string   `json:"display_name"`
+	Description        string   `json:"description,optional"`
+	Status             string   `json:"status"`
+	DefaultChannelSlug string   `json:"default_channel_slug,optional"`
+	Tags               []string `json:"tags,optional"`
+	QuotaPromptsMax    int64    `json:"quota_prompts_max"`
+	PromptCount        int64    `json:"prompt_count"`
+	ArchivedAtIso      string   `json:"archived_at,optional"`
+}
+
+type NamespaceListResp struct {
+	Namespaces []NamespaceDetail `json:"namespaces"`
+}
+
+type PatchNamespaceReq struct {
+	DisplayName        string   `json:"display_name,optional"`
+	Description        string   `json:"description,optional"`
+	DefaultChannelSlug string   `json:"default_channel_slug,optional"`
+	Tags               []string `json:"tags,optional"`
+	QuotaPromptsMax    int64    `json:"quota_prompts_max,optional"`
 }
 
 type RefreshResp struct {

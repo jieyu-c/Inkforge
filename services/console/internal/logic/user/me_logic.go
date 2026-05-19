@@ -7,6 +7,7 @@ import (
 
 	"github.com/jieyuc/inkforge/services/console/internal/pkg/apperr"
 	"github.com/jieyuc/inkforge/services/console/internal/pkg/authctx"
+	"github.com/jieyuc/inkforge/services/console/internal/pkg/phone"
 	"github.com/jieyuc/inkforge/services/console/internal/svc"
 	"github.com/jieyuc/inkforge/services/console/internal/types"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -43,6 +44,6 @@ func (l *MeLogic) Me() (resp *types.MeResp, err error) {
 
 	return &types.MeResp{
 		UserID: u.ID,
-		Phone:  u.Phone,
+		Phone:  phone.MaskDisplay(u.Phone),
 	}, nil
 }

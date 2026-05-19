@@ -17,14 +17,39 @@ export class ApiError extends Error {
   }
 }
 
+function tryRestEnvelope(
+  parsed: unknown,
+): { code: number; msg: string; data?: unknown } | null {
+  if (parsed === null || typeof parsed !== "object") return null;
+  const o = parsed as Record<string, unknown>;
+  if (typeof o.code !== "number" || typeof o.msg !== "string") return null;
+  return { code: o.code, msg: o.msg, data: o.data };
+}
+
+/** Server uses jieyuc-common RestResponse: HTTP often 200 with code/msg/data. */
+function unwrapDataOrThrow<T>(res: Response, parsed: unknown): T {
+  const env = tryRestEnvelope(parsed);
+  if (!env) return parsed as T;
+  if (env.code !== 0) {
+    throw new ApiError(res.status, String(env.code), env.msg);
+  }
+  return env.data as T;
+}
+
 async function parseError(res: Response): Promise<ApiError> {
   try {
-    const j = (await res.json()) as { code?: string; message?: string };
-    return new ApiError(
-      res.status,
-      j.code ?? "HTTP_ERROR",
-      j.message ?? res.statusText,
-    );
+    const j = (await res.json()) as {
+      code?: string | number;
+      message?: string;
+      msg?: string;
+    };
+    const message = j.message ?? j.msg ?? res.statusText;
+    const codeRaw = j.code;
+    const code =
+      typeof codeRaw === "number"
+        ? String(codeRaw)
+        : (codeRaw ?? "HTTP_ERROR");
+    return new ApiError(res.status, code, message);
   } catch {
     return new ApiError(res.status, "HTTP_ERROR", res.statusText);
   }
@@ -44,11 +69,31 @@ async function refreshSession(): Promise<boolean> {
     notifyAccessTokenChanged();
     return false;
   }
-  const data = (await res.json()) as {
-    access_token: string;
-    expires_in: number;
-  };
-  writeAccessToken(data.access_token);
+  const text = await res.text();
+  if (!text) {
+    writeAccessToken(null);
+    notifyAccessTokenChanged();
+    return false;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    writeAccessToken(null);
+    notifyAccessTokenChanged();
+    return false;
+  }
+  try {
+    const data = unwrapDataOrThrow<{
+      access_token: string;
+      expires_in: number;
+    }>(res, parsed);
+    writeAccessToken(data.access_token);
+  } catch {
+    writeAccessToken(null);
+    notifyAccessTokenChanged();
+    return false;
+  }
   notifyAccessTokenChanged();
   return true;
 }
@@ -135,5 +180,6 @@ export async function apiRequest<T>(
 
   const text = await res.text();
   if (!text) return undefined as T;
-  return JSON.parse(text) as T;
+  const parsed: unknown = JSON.parse(text);
+  return unwrapDataOrThrow<T>(res, parsed);
 }

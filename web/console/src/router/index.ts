@@ -1,7 +1,11 @@
+import ConsoleLayout from "@/layouts/ConsoleLayout.vue";
 import { useAuthStore } from "@/stores/auth";
+import ComingSoonView from "@/views/console/ComingSoonView.vue";
+import SettingsView from "@/views/console/SettingsView.vue";
 import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
+import WorkspaceView from "@/views/WorkspaceView.vue";
 import {
   createRouter,
   createWebHistory,
@@ -26,7 +30,37 @@ const routes = [
     path: "/home",
     name: "home",
     component: HomeView,
+  },
+  {
+    path: "/workspace",
+    component: ConsoleLayout,
     meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "workspace",
+        component: WorkspaceView,
+        meta: {
+          titleI18nKey: "workspace.pageTitle",
+        },
+      },
+      {
+        path: "prompts",
+        name: "console-prompts",
+        component: ComingSoonView,
+        meta: {
+          titleI18nKey: "workspace.comingSoonPromptsTitle",
+        },
+      },
+      {
+        path: "settings",
+        name: "console-settings",
+        component: SettingsView,
+        meta: {
+          titleI18nKey: "workspace.settingsPageTitle",
+        },
+      },
+    ],
   },
 ];
 
@@ -35,16 +69,14 @@ export const router = createRouter({
   routes,
 });
 
-function wantsAuth(
-  m: RouteLocationNormalized["meta"],
-): m is { requiresAuth: true } {
-  return m.requiresAuth === true;
-}
-
 function wantsGuest(
   m: RouteLocationNormalized["meta"],
 ): m is { guestOnly: true } {
   return m.guestOnly === true;
+}
+
+function requiresAuthMatched(to: RouteLocationNormalized): boolean {
+  return to.matched.some((r) => r.meta.requiresAuth === true);
 }
 
 router.beforeEach(async (to) => {
@@ -59,11 +91,11 @@ router.beforeEach(async (to) => {
       }
     }
     if (auth.accessToken) {
-      return { name: "home" };
+      return { name: "workspace" };
     }
   }
 
-  if (wantsAuth(to.meta)) {
+  if (requiresAuthMatched(to)) {
     const ok = await auth.ensureSession();
     if (!ok) {
       return { name: "login", query: { redirect: to.fullPath } };

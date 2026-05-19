@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	auth "github.com/jieyuc/inkforge/services/console/internal/handler/auth"
+	namespace "github.com/jieyuc/inkforge/services/console/internal/handler/namespace"
 	user "github.com/jieyuc/inkforge/services/console/internal/handler/user"
 	"github.com/jieyuc/inkforge/services/console/internal/svc"
 
@@ -38,21 +39,59 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	}
 
 	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.AuthRateLimit},
-			authRoutes...,
-		),
+		rest.WithMiddlewares([]rest.Middleware{serverCtx.AuthRateLimit}, authRoutes...),
 		rest.WithPrefix("/api/v1/auth"),
 	)
 
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodGet,
-				Path:    "/me",
-				Handler: user.MeHandler(serverCtx),
-			},
+	nsRoutes := []rest.Route{
+		{
+			Method:  http.MethodGet,
+			Path:    "/namespaces",
+			Handler: namespace.ListNamespacesHandler(serverCtx),
 		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/namespaces",
+			Handler: namespace.CreateNamespaceHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/namespaces/:nsSlug",
+			Handler: namespace.GetNamespaceHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodPatch,
+			Path:    "/namespaces/:nsSlug",
+			Handler: namespace.PatchNamespaceHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/namespaces/:nsSlug/archive",
+			Handler: namespace.ArchiveNamespaceHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/namespaces/:nsSlug/restore",
+			Handler: namespace.RestoreNamespaceHandler(serverCtx),
+		},
+	}
+
+	server.AddRoutes(
+		rest.WithMiddlewares([]rest.Middleware{serverCtx.TenantCtx}, nsRoutes...),
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/me"),
+	)
+
+	apiRoutes := []rest.Route{
+		{
+			Method:  http.MethodGet,
+			Path:    "/me",
+			Handler: user.MeHandler(serverCtx),
+		},
+	}
+
+	server.AddRoutes(
+		rest.WithMiddlewares([]rest.Middleware{serverCtx.TenantCtx}, apiRoutes...),
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)

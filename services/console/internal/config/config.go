@@ -36,4 +36,10 @@ type Config struct {
 		AuthPhoneRequestsPerMinute float64 `json:",default=10"`
 		AuthPhoneBurst             int     `json:",default=20"`
 	}
+	// Namespace: personal-namespace defaults and quota merge (tenant_id mirrors user id in MVP).
+	Namespace struct {
+		DefaultQuotaPromptsPerNs int64 `json:",default=100"`
+		// PlatformQuotaPromptsCap: when >0, caps effective Prompt count max per NS (minimum with NS-level override).
+		PlatformQuotaPromptsCap int64 `json:",optional"` // zero = unset (no separate platform ceiling in merge)
+	}
 }

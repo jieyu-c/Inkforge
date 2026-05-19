@@ -5,7 +5,7 @@ Mode: dev
 Timeout: 30000
 
 Mysql:
-  DataSource: inkforge:inkforge@tcp(127.0.0.1:3306)/inkforge?parseTime=true&loc=UTC&charset=utf8mb4
+  DataSource: root:123456@tcp(127.0.0.1:3306)/inkforge?parseTime=true&loc=UTC&charset=utf8mb4
 
 Redis:
   Host: 127.0.0.1:6379
@@ -25,7 +25,7 @@ Auth:
   BcryptCost: 10
   LockFailures: 8
   LockDurationMinutes: 15
-  MinPasswordLength: 10
+  MinPasswordLength: 8
   ResetTokenTTLMinutes: 30
   ForgotPasswordThrottleSeconds: 60
   SAMLAssertionMaxAgeMinutes: 5
@@ -35,3 +35,7 @@ RateLimit:
   AuthIPBurst: 60
   AuthPhoneRequestsPerMinute: 10
   AuthPhoneBurst: 20
+
+Namespace:
+  DefaultQuotaPromptsPerNs: 500
+  PlatformQuotaPromptsCap: 0

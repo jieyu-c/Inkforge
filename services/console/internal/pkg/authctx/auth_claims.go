@@ -11,7 +11,8 @@ import (
 
 const KeysUserID = "user_id"
 const KeysSessionID = "sid"
-
+// KeysTenantID mirrors the isolation domain derived from JWT in personal MVP (same value as user id).
+const KeysTenantID = "tenant_id"
 func StringClaim(ctx context.Context, key string) (string, bool) {
 	raw := ctx.Value(key)
 	switch v := raw.(type) {

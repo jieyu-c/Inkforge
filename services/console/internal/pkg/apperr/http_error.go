@@ -36,6 +36,10 @@ func Forbidden(code, msg string) *HTTP {
 	return &HTTP{Status: 403, Code: code, Message: msg}
 }
 
+func NotFound(code, msg string) *HTTP {
+	return &HTTP{Status: 404, Code: code, Message: msg}
+}
+
 func Conflict(code, msg string) *HTTP {
 	return &HTTP{Status: 409, Code: code, Message: msg}
 }

@@ -53,7 +53,7 @@ func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRe
 
 	minLen := l.svcCtx.Config.Auth.MinPasswordLength
 	if minLen <= 0 {
-		minLen = 10
+		minLen = 8
 	}
 	if len(req.Password) < minLen {
 		return nil, apperr.BadRequest("WEAK_PASSWORD", "Password does not meet policy")

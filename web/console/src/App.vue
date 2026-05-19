@@ -8,27 +8,39 @@ import { RouterView } from "vue-router";
 
 <style>
 :root {
-  color-scheme: light;
-  --bg: #f3efe8;
-  --surface: #fffefb;
-  --surface-2: #faf7f2;
-  --ink: #1c1917;
-  --muted: #78716c;
-  --border: #e7e1d8;
-  --accent: #1d4a47;
-  --danger: #b4533c;
-  --ok: #3f6f46;
-  --shadow: 0 18px 40px rgba(28, 25, 23, 0.06);
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  color-scheme: dark;
+  --bg: #070a12;
+  --bg-elevated: #0d111c;
+  --surface: color-mix(in srgb, #121a2a 78%, transparent);
+  --surface-2: color-mix(in srgb, #0a1628 92%, transparent);
+  --accent: #6366f1;
+  --accent-dim: color-mix(in srgb, var(--accent) 55%, #0f172a);
+  --accent-glow: color-mix(in srgb, var(--accent) 45%, transparent);
+  --border: color-mix(in srgb, var(--accent) 16%, #1e293b 84%);
+  --border-dim: color-mix(in srgb, #94a3b8 22%, transparent);
+  --ink: #e8eef7;
+  --muted: #8b9cb3;
+  --danger: #f87171;
+  --ok: #4ade80;
+  --shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent),
+    0 24px 48px rgba(0, 0, 0, 0.45);
+
+  /* Landing / chrome tokens (aligned to GitHub-style dark UI) */
+  --bg-canvas: var(--bg);
+  --fg: var(--ink);
+  --fg-muted: var(--muted);
+  --fg-soft: color-mix(in srgb, var(--muted) 88%, transparent);
+  --border-subtle: color-mix(in srgb, #30363d 55%, transparent);
+  --border-faint: color-mix(in srgb, #30363d 35%, transparent);
+  --border-strong: color-mix(in srgb, #8b9cb3 32%, var(--border-dim));
+  --accent-soft: color-mix(in srgb, var(--accent) 40%, transparent);
+  --elev: var(--surface);
+  --elev-2: var(--surface-2);
+  --pill-hover: color-mix(in srgb, var(--muted) 12%, transparent);
+
+  font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.5;
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--ink);
 }
 
@@ -40,13 +52,61 @@ import { RouterView } from "vue-router";
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      color-mix(in srgb, #3730a3 34%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 100% 100%,
+      color-mix(in srgb, #1e3a5f 25%, transparent),
+      transparent 45%
+    ),
+    var(--bg);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--accent) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--accent) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 40%, black 15%, transparent 75%);
+  opacity: 0.55;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
 }
 
 a {
+  color: var(--accent);
   text-decoration: none;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
 }
 
 a:hover {
-  text-decoration: underline;
+  color: color-mix(in srgb, var(--accent) 85%, white);
+  text-shadow: 0 0 20px var(--accent-glow);
+  text-decoration: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 </style>
