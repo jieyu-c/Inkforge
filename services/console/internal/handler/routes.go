@@ -8,6 +8,7 @@ import (
 
 	auth "github.com/jieyuc/inkforge/services/console/internal/handler/auth"
 	namespace "github.com/jieyuc/inkforge/services/console/internal/handler/namespace"
+	prompt "github.com/jieyuc/inkforge/services/console/internal/handler/prompt"
 	user "github.com/jieyuc/inkforge/services/console/internal/handler/user"
 	"github.com/jieyuc/inkforge/services/console/internal/svc"
 
@@ -15,83 +16,156 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
-	authRoutes := []rest.Route{
-		{
-			Method:  http.MethodPost,
-			Path:    "/login",
-			Handler: auth.LoginHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPost,
-			Path:    "/logout",
-			Handler: auth.LogoutHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPost,
-			Path:    "/refresh",
-			Handler: auth.RefreshHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPost,
-			Path:    "/register",
-			Handler: auth.RegisterHandler(serverCtx),
-		},
-	}
-
 	server.AddRoutes(
-		rest.WithMiddlewares([]rest.Middleware{serverCtx.AuthRateLimit}, authRoutes...),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AuthRateLimit},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/login",
+					Handler: auth.LoginHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/logout",
+					Handler: auth.LogoutHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/refresh",
+					Handler: auth.RefreshHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/register",
+					Handler: auth.RegisterHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithPrefix("/api/v1/auth"),
 	)
 
-	nsRoutes := []rest.Route{
-		{
-			Method:  http.MethodGet,
-			Path:    "/namespaces",
-			Handler: namespace.ListNamespacesHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPost,
-			Path:    "/namespaces",
-			Handler: namespace.CreateNamespaceHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/namespaces/:nsSlug",
-			Handler: namespace.GetNamespaceHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPatch,
-			Path:    "/namespaces/:nsSlug",
-			Handler: namespace.PatchNamespaceHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPost,
-			Path:    "/namespaces/:nsSlug/archive",
-			Handler: namespace.ArchiveNamespaceHandler(serverCtx),
-		},
-		{
-			Method:  http.MethodPost,
-			Path:    "/namespaces/:nsSlug/restore",
-			Handler: namespace.RestoreNamespaceHandler(serverCtx),
-		},
-	}
-
 	server.AddRoutes(
-		rest.WithMiddlewares([]rest.Middleware{serverCtx.TenantCtx}, nsRoutes...),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.TenantCtx},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces",
+					Handler: namespace.ListNamespacesHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/namespaces",
+					Handler: namespace.CreateNamespaceHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug",
+					Handler: namespace.GetNamespaceHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/namespaces/:nsSlug",
+					Handler: namespace.PatchNamespaceHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/namespaces/:nsSlug/archive",
+					Handler: namespace.ArchiveNamespaceHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/namespaces/:nsSlug/restore",
+					Handler: namespace.RestoreNamespaceHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/me"),
 	)
 
-	apiRoutes := []rest.Route{
-		{
-			Method:  http.MethodGet,
-			Path:    "/me",
-			Handler: user.MeHandler(serverCtx),
-		},
-	}
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.TenantCtx},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug/prompts",
+					Handler: prompt.ListPromptsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/namespaces/:nsSlug/prompts",
+					Handler: prompt.CreatePromptHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey",
+					Handler: prompt.GetPromptHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey",
+					Handler: prompt.PatchPromptHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey",
+					Handler: prompt.DeletePromptHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/channels/:channel",
+					Handler: prompt.GetChannelPointerHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/channels/:channel",
+					Handler: prompt.PatchChannelPointerHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/draft",
+					Handler: prompt.GetDraftHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/draft",
+					Handler: prompt.PutDraftHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/versions",
+					Handler: prompt.CreateVersionHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/versions",
+					Handler: prompt.ListVersionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/namespaces/:nsSlug/prompts/:promptKey/versions/diff",
+					Handler: prompt.DiffVersionsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/me"),
+	)
 
 	server.AddRoutes(
-		rest.WithMiddlewares([]rest.Middleware{serverCtx.TenantCtx}, apiRoutes...),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.TenantCtx},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/me",
+					Handler: user.MeHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
 		rest.WithPrefix("/api/v1"),
 	)

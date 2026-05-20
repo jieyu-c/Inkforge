@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -17,6 +18,8 @@ type (
 		consoleNamespacesModel
 		withSession(session sqlx.Session) ConsoleNamespacesModel
 		ListByTenantId(ctx context.Context, tenantID string) ([]*ConsoleNamespaces, error)
+		// AddPromptCount increments console_namespaces.prompt_count when a new prompt_key is created (delta must be +1 or -1).
+		AddPromptCount(ctx context.Context, tenantID, nsID string, delta int) error
 	}
 
 	customConsoleNamespacesModel struct {
@@ -33,6 +36,37 @@ func NewConsoleNamespacesModel(conn sqlx.SqlConn) ConsoleNamespacesModel {
 
 func (m *customConsoleNamespacesModel) withSession(session sqlx.Session) ConsoleNamespacesModel {
 	return NewConsoleNamespacesModel(sqlx.NewSqlConnFromSession(session))
+}
+
+func (m *customConsoleNamespacesModel) AddPromptCount(ctx context.Context, tenantID, nsID string, delta int) error {
+	if delta == 0 {
+		return nil
+	}
+	var q string
+	switch {
+	case delta > 0:
+		q = fmt.Sprintf(`update %s set prompt_count = prompt_count + ? where id = ? and tenant_id = ?`, "`console_namespaces`")
+	default:
+		q = fmt.Sprintf(`update %s set prompt_count = IF(prompt_count > 0, prompt_count - 1, 0) where id = ? and tenant_id = ?`, "`console_namespaces`")
+	}
+	var res sql.Result
+	var err error
+	if delta > 0 {
+		res, err = m.conn.ExecCtx(ctx, q, delta, nsID, tenantID)
+	} else {
+		res, err = m.conn.ExecCtx(ctx, q, nsID, tenantID)
+	}
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n != 1 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 func (m *customConsoleNamespacesModel) ListByTenantId(ctx context.Context,

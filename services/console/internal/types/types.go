@@ -3,13 +3,36 @@
 
 package types
 
+type ChannelPointerResp struct {
+	Channel   string `json:"channel"`
+	VersionId string `json:"version_id"`
+	Version   string `json:"version"`
+	UpdatedAt string `json:"updated_at"`
+}
+
 type CreateNamespaceReq struct {
-	NsSlug             string   `json:"ns_slug"`
-	DisplayName        string   `json:"display_name"`
-	Description        string   `json:"description,optional"`
-	DefaultChannelSlug string   `json:"default_channel_slug,optional"`
-	Tags               []string `json:"tags,optional"`
-	QuotaPromptsMax    int64    `json:"quota_prompts_max,optional"`
+	DisplayName     string   `json:"display_name"`
+	Description     string   `json:"description,optional"`
+	Tags            []string `json:"tags,optional"`
+	QuotaPromptsMax int64    `json:"quota_prompts_max,optional"`
+}
+
+type CreatePromptReq struct {
+	Title       string   `json:"title"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+}
+
+type CreateVersionReq struct {
+	ChangeNote string `json:"change_note,optional"`
+	Version    string `json:"version,optional"`
+}
+
+type DraftResp struct {
+	Body      string   `json:"body"`
+	Schema    string   `json:"schema,optional"`
+	Warnings  []string `json:"warnings,optional"`
+	UpdatedAt string   `json:"updated_at"`
 }
 
 type Empty struct {
@@ -21,6 +44,18 @@ type ErrorBody struct {
 }
 
 type JwtAuth struct {
+}
+
+type ListPromptsReq struct {
+	Page     int64  `form:"page,optional"`
+	PageSize int64  `form:"page_size,optional"`
+	Q        string `form:"q,optional"`
+}
+
+type ListVersionsReq struct {
+	Page     int64  `form:"page,optional"`
+	PageSize int64  `form:"page_size,optional"`
+	Q        string `form:"q,optional"`
 }
 
 type LoginReq struct {
@@ -54,12 +89,63 @@ type NamespaceListResp struct {
 	Namespaces []NamespaceDetail `json:"namespaces"`
 }
 
+type PatchChannelPointerReq struct {
+	VersionId string `json:"version_id"`
+}
+
 type PatchNamespaceReq struct {
 	DisplayName        string   `json:"display_name,optional"`
 	Description        string   `json:"description,optional"`
 	DefaultChannelSlug string   `json:"default_channel_slug,optional"`
 	Tags               []string `json:"tags,optional"`
 	QuotaPromptsMax    int64    `json:"quota_prompts_max,optional"`
+}
+
+type PatchPromptReq struct {
+	Title       string   `json:"title,optional"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+}
+
+type PromptDetail struct {
+	PromptKey   string   `json:"prompt_key"`
+	Title       string   `json:"title,optional"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+	DraftBody   string   `json:"draft_body"`
+	DraftSchema string   `json:"draft_schema,optional"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+
+type PromptListResp struct {
+	Items []PromptSummary `json:"items"`
+	Total int64           `json:"total"`
+}
+
+type PromptSummary struct {
+	PromptKey   string   `json:"prompt_key"`
+	Title       string   `json:"title,optional"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+
+type PromptVersionItem struct {
+	Id              string `json:"id"`
+	Version         string `json:"version"`
+	ChangeNote      string `json:"change_note,optional"`
+	CreatedByUserId string `json:"created_by_user_id"`
+	CreatedAt       string `json:"created_at"`
+}
+
+type PromptVersionListResp struct {
+	Items []PromptVersionItem `json:"items"`
+	Total int64               `json:"total"`
+}
+
+type PutDraftReq struct {
+	Body   string `json:"body"`
+	Schema string `json:"schema,optional"`
 }
 
 type RefreshResp struct {
@@ -74,4 +160,14 @@ type RegisterReq struct {
 
 type RegisterResp struct {
 	Message string `json:"message"`
+}
+
+type DiffVersionsReq struct {
+	VersionA string `form:"version_a"`
+	VersionB string `form:"version_b"`
+}
+
+type VersionDiffResp struct {
+	BodyDiff   string `json:"body_diff"`
+	SchemaDiff string `json:"schema_diff"`
 }

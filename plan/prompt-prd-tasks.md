@@ -146,12 +146,12 @@ flowchart LR
 
 | ID | 内容 | 状态 |
 |----|------|------|
-| prompt-decisions | 回填 **P-DEC-01～05**（及与 N-DEC-02 联动的只读 UI） | pending |
-| p0-prompt-schema | Prompt/草稿/版本/指针 **DDL** + goctl model | pending |
-| p0-prompt-api | 扩展 `console.api` Prompt 路由 + goctl 生成 + logic（CRUD key、draft、version、diff、pointers） | pending |
-| p0-prompt-guards | 挂接 **archived 写拦截**、**ns_id 作用域**、**Prompt 配额**（与 namespace 中间件/计数一致） | pending |
-| p0-prompt-tests | 隔离、归档写、AC-N-04、PRM 验收用例 | pending |
-| p0-prompt-audit | `prompt.*` / `prompt.version.*` / `prompt.pointer.*` 事件与日志字段 | pending |
+| prompt-decisions | 回填 **P-DEC-01～05**（及与 N-DEC-02 联动的只读 UI） | **已落地默认**：P-DEC-01 单调 version_num；P-DEC-02 正文+schema diff；P-DEC-03 关闭审批；P-DEC-04 配置 `Prompt.DraftValidation` strict/warn；P-DEC-05 配置 `Prompt.MaxVersionsPerPrompt` 拒绝新建快照 |
+| p0-prompt-schema | Prompt/草稿/版本/指针 **DDL** + goctl model | **done**（`console_prompts_ddl.sql` + `console_prompts_goctl.sql`） |
+| p0-prompt-api | 扩展 `console.api` + goctl + logic | **done** |
+| p0-prompt-guards | archived 写拦截、tenant/ns 作用域、Prompt 配额 | **done**（复用 nsguard/nsquota；仓库查询带 tenant_id+ns_id） |
+| p0-prompt-tests | … | pending |
+| p0-prompt-audit | 事件与日志 | **done**（基础 `nsaudit` 事件） |
 | p1-prompt-quota-versions | 版本保留策略实现（共用 P-DEC-05） | pending |
 | p1-prompt-advanced | 导出导入、PRM-010 子项、全文检索（按排期） | pending |
 | p1-prompt-approval | PRM-007 审批流（依赖 P-DEC-03） | pending |

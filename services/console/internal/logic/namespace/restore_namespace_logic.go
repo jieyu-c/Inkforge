@@ -32,7 +32,7 @@ func (l *RestoreNamespaceLogic) RestoreNamespace(nsSlug string) (*types.Namespac
 	if err != nil {
 		return nil, err
 	}
-	row, err := findTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
+	row, err := FindTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (l *RestoreNamespaceLogic) RestoreNamespace(nsSlug string) (*types.Namespac
 		return nil, err
 	}
 	nsaudit.Restored(tid, nsSlug)
-	rec, ferr := findTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
+	rec, ferr := FindTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
 	if ferr != nil {
 		return nil, ferr
 	}

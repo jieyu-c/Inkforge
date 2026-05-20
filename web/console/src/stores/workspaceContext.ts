@@ -20,6 +20,10 @@ function readNsFromStorage(): string {
   }
 }
 
+export function isActiveNamespace(ns: NamespaceDetail): boolean {
+  return ns.status === "active";
+}
+
 function writeNsToStorage(slug: string) {
   try {
     if (slug === "") {
@@ -46,6 +50,8 @@ export const useWorkspaceContextStore = defineStore("workspaceContext", {
     hasSelectedNs: (s) => s.selectedNsSlug.length > 0,
     selectedNamespace: (s) =>
       s.namespaces.find((n) => n.ns_slug === s.selectedNsSlug) ?? null,
+    activeNamespaces: (s) => s.namespaces.filter(isActiveNamespace),
+    archivedNamespaces: (s) => s.namespaces.filter((n) => !isActiveNamespace(n)),
   },
   actions: {
     setSelectedNsSlug(slug: string) {
@@ -53,16 +59,18 @@ export const useWorkspaceContextStore = defineStore("workspaceContext", {
       this.selectedNsSlug = next;
       writeNsToStorage(next);
     },
-    /** After NS list loads, drop invalid persisted selection or default to first. */
-    syncSelectionAgainstNsList(slugs: string[]) {
-      const set = new Set(slugs);
-      if (this.selectedNsSlug && !set.has(this.selectedNsSlug)) {
-        const first = slugs[0] ?? "";
-        this.setSelectedNsSlug(first);
+    /** After NS list loads, keep archived selection; otherwise sync to active namespaces. */
+    syncSelectionAgainstNsList() {
+      const allSlugs = this.namespaces.map((n) => n.ns_slug);
+      const activeSlugs = this.activeNamespaces.map((n) => n.ns_slug);
+      const allSet = new Set(allSlugs);
+
+      if (this.selectedNsSlug && !allSet.has(this.selectedNsSlug)) {
+        this.setSelectedNsSlug(activeSlugs[0] ?? allSlugs[0] ?? "");
         return;
       }
-      if (!this.selectedNsSlug && slugs.length === 1) {
-        this.setSelectedNsSlug(slugs[0]!);
+      if (!this.selectedNsSlug && activeSlugs.length === 1) {
+        this.setSelectedNsSlug(activeSlugs[0]!);
       }
     },
     async reloadNamespaces(options?: { selectFirst?: boolean }) {
@@ -71,11 +79,10 @@ export const useWorkspaceContextStore = defineStore("workspaceContext", {
       try {
         const res = await listNamespaces();
         this.namespaces = res.namespaces ?? [];
-        const slugs = this.namespaces.map((n) => n.ns_slug);
-        if (options?.selectFirst === true && !this.selectedNsSlug && slugs.length > 0) {
-          this.setSelectedNsSlug(slugs[0]!);
+        if (options?.selectFirst === true && !this.selectedNsSlug && this.activeNamespaces.length > 0) {
+          this.setSelectedNsSlug(this.activeNamespaces[0]!.ns_slug);
         } else {
-          this.syncSelectionAgainstNsList(slugs);
+          this.syncSelectionAgainstNsList();
         }
       } catch (e) {
         this.namespaces = [];
@@ -105,8 +112,8 @@ export const useWorkspaceContextStore = defineStore("workspaceContext", {
       await archiveNamespace(ns);
       await this.reloadNamespaces();
       if (this.selectedNsSlug === ns) {
-        const next = this.namespaces.find((x) => x.status === "active" && x.ns_slug !== ns);
-        this.setSelectedNsSlug(next?.ns_slug ?? this.namespaces[0]?.ns_slug ?? "");
+        const next = this.activeNamespaces.find((x) => x.ns_slug !== ns);
+        this.setSelectedNsSlug(next?.ns_slug ?? "");
       }
     },
     async restoreSelected(slug?: string) {

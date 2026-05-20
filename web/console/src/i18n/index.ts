@@ -5,15 +5,29 @@ import en from "@/locales/en.json";
 import zh from "@/locales/zh.json";
 import { syncDocumentLang } from "./sync-document-lang";
 
+function detectBrowserLocale(): AppLocale {
+  if (typeof navigator === "undefined") {
+    return "en";
+  }
+  const langs =
+    navigator.languages?.length > 0 ? navigator.languages : [navigator.language];
+  for (const lang of langs) {
+    const normalized = lang.toLowerCase();
+    if (normalized === "zh" || normalized.startsWith("zh-")) {
+      return "zh";
+    }
+  }
+  return "en";
+}
+
 function initialLocale(): AppLocale {
-  if (typeof localStorage === "undefined") {
-    return "en";
+  if (typeof localStorage !== "undefined") {
+    const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (raw && isAppLocale(raw)) {
+      return raw;
+    }
   }
-  const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
-  if (!raw || !isAppLocale(raw)) {
-    return "en";
-  }
-  return raw;
+  return detectBrowserLocale();
 }
 
 export const i18n = createI18n({

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
+import KeyboardShortcutsFab from "@/components/KeyboardShortcutsFab.vue";
+import NamespaceTopbarActions from "@/components/NamespaceTopbarActions.vue";
+import NamespaceSelect from "@/components/NamespaceSelect.vue";
+import { isActiveNamespace } from "@/stores/workspaceContext";
 import InkforgeLogoMark from "@/components/InkforgeLogoMark.vue";
 import { ApiError } from "@/api/client";
 import { me, type MeResp } from "@/api/user";
@@ -19,6 +22,20 @@ const profile = ref<MeResp | null>(null);
 const profileError = ref<string | null>(null);
 const profileLoading = ref(false);
 const logoutBusy = ref(false);
+
+const nsOptions = computed(() =>
+  wsCtx.activeNamespaces.map((namespace) => ({
+    value: namespace.ns_slug,
+    label: namespace.display_name,
+  })),
+);
+
+const nsSelectedLabel = computed(() => {
+  const ns = wsCtx.selectedNamespace;
+  if (!ns) return undefined;
+  if (isActiveNamespace(ns)) return ns.display_name;
+  return `${ns.display_name} (${t("workspace.nsArchivedShort")})`;
+});
 
 const pageTitle = computed(() => {
   const key = route.meta.titleI18nKey;
@@ -76,7 +93,7 @@ onMounted(() => {
 
     <nav class="rail" :aria-label="t('console.shell.railAria')">
       <div class="rail-brand">
-        <RouterLink class="brand-link" :to="{ name: 'workspace' }">
+        <RouterLink class="brand-link" :to="{ name: 'home' }">
           <span class="brand-mark-wrap" aria-hidden="true">
             <InkforgeLogoMark class="brand-mark" />
           </span>
@@ -89,19 +106,12 @@ onMounted(() => {
         <li>
           <RouterLink
             class="rail-link"
-            :class="{ 'is-active': route.name === 'workspace' }"
+            :class="{
+              'is-active': route.name === 'workspace' || route.name === 'console-prompt-detail',
+            }"
             :to="{ name: 'workspace' }"
           >
             {{ t("console.nav.dashboard") }}
-          </RouterLink>
-        </li>
-        <li>
-          <RouterLink
-            class="rail-link"
-            :class="{ 'is-active': route.name === 'console-prompts' }"
-            :to="{ name: 'console-prompts' }"
-          >
-            {{ t("console.nav.prompts") }}
           </RouterLink>
         </li>
       </ul>
@@ -158,21 +168,16 @@ onMounted(() => {
           <div class="ns-bar" :title="wsCtx.namespacesError ?? undefined">
             <label class="ns-bar-inner" :for="'inkforge-ns-shell'">
               <span class="ns-bar-label">{{ t("workspace.topbarNsLabel") }}</span>
-              <select
+              <NamespaceSelect
                 id="inkforge-ns-shell"
-                class="ns-select mono"
+                :model-value="wsCtx.selectedNsSlug"
+                :options="nsOptions"
+                :selected-label="nsSelectedLabel"
+                :empty-label="t('workspace.topbarNsEmpty')"
                 :disabled="wsCtx.namespacesLoading"
                 :aria-busy="wsCtx.namespacesLoading"
-                :value="wsCtx.selectedNsSlug"
-                @change="
-                  wsCtx.setSelectedNsSlug(($event.target as HTMLSelectElement).value)
-                "
-              >
-                <option value="">{{ t("workspace.topbarNsEmpty") }}</option>
-                <option v-for="n in wsCtx.namespaces" :key="n.ns_slug" :value="n.ns_slug">
-                  {{ n.display_name }} · {{ n.ns_slug }}
-                </option>
-              </select>
+                @update:model-value="wsCtx.setSelectedNsSlug"
+              />
               <span v-if="wsCtx.namespacesLoading" class="ns-bar-status">{{
                 t("workspace.topbarNsLoading")
               }}</span>
@@ -180,10 +185,10 @@ onMounted(() => {
                 t("workspace.topbarNsError")
               }}</span>
             </label>
+            <NamespaceTopbarActions />
           </div>
         </div>
         <div class="topbar-right">
-          <LocaleSwitcher variant="inline" class="locale" />
           <div
             v-if="profile"
             class="user-meta"
@@ -210,6 +215,8 @@ onMounted(() => {
         <RouterView />
       </main>
     </div>
+
+    <KeyboardShortcutsFab />
   </div>
 </template>
 
@@ -398,6 +405,13 @@ onMounted(() => {
   min-width: 0;
 }
 
+.ns-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.85rem;
+}
+
 .ns-bar-inner {
   display: grid;
   grid-template-columns: minmax(0, auto);
@@ -413,22 +427,6 @@ onMounted(() => {
   color: var(--fg-soft);
 }
 
-.ns-select {
-  min-width: min(420px, 78vw);
-  max-width: 100%;
-  padding: 0.32rem 0.52rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
-  background: var(--elev-2);
-  color: var(--fg);
-  font-size: 0.7825rem;
-}
-
-.ns-select:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 .ns-bar-status {
   font-size: 0.7rem;
   color: var(--fg-soft);
@@ -442,10 +440,6 @@ onMounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55rem;
-}
-
-.locale {
-  flex-shrink: 0;
 }
 
 .user-meta {

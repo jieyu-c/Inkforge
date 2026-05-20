@@ -38,7 +38,7 @@ func (l *PatchNamespaceLogic) PatchNamespace(nsSlug string, req *types.PatchName
 	if err != nil {
 		return nil, err
 	}
-	row, err := findTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
+	row, err := FindTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (l *PatchNamespaceLogic) PatchNamespace(nsSlug string, req *types.PatchName
 		return nil, err
 	}
 
-	rec, ferr := findTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
+	rec, ferr := FindTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
 	if ferr != nil {
 		return nil, ferr
 	}

@@ -28,7 +28,7 @@ func (l *GetNamespaceLogic) GetNamespace(nsSlug string) (*types.NamespaceDetail,
 	if err != nil {
 		return nil, err
 	}
-	row, err := findTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
+	row, err := FindTenantNsOr404(l.ctx, l.svcCtx, tid, nsSlug)
 	if err != nil {
 		return nil, err
 	}

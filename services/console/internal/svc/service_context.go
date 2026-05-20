@@ -19,9 +19,12 @@ type ServiceContext struct {
 	DB                   sqlx.SqlConn
 	Users                *repo.Users
 	Sessions             *repo.Sessions
-	ConsoleNamespacesModel model.ConsoleNamespacesModel
-	AuthRateLimit        rest.Middleware
-	TenantCtx            rest.Middleware
+	ConsoleNamespacesModel            model.ConsoleNamespacesModel
+	ConsolePromptsModel               model.ConsolePromptsModel
+	ConsolePromptVersionsModel        model.ConsolePromptVersionsModel
+	ConsolePromptChannelPointersModel model.ConsolePromptChannelPointersModel
+	AuthRateLimit          rest.Middleware
+	TenantCtx              rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -36,12 +39,15 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	rds := redis.MustNewRedis(c.Redis)
 
 	return &ServiceContext{
-		Config:               c,
-		DB:                   db,
-		Users:                repo.NewUsers(db),
-		Sessions:             repo.NewSessions(db),
+		Config:                 c,
+		DB:                     db,
+		Users:                  repo.NewUsers(db),
+		Sessions:               repo.NewSessions(db),
 		ConsoleNamespacesModel: model.NewConsoleNamespacesModel(db),
-		AuthRateLimit:        middleware.NewAuthRateLimitMiddleware(c, rds).Handle,
-		TenantCtx:            middleware.NewTenantCtxMiddleware().Handle,
+		ConsolePromptsModel:    model.NewConsolePromptsModel(db),
+		ConsolePromptVersionsModel: model.NewConsolePromptVersionsModel(db),
+		ConsolePromptChannelPointersModel: model.NewConsolePromptChannelPointersModel(db),
+		AuthRateLimit:          middleware.NewAuthRateLimitMiddleware(c, rds).Handle,
+		TenantCtx:              middleware.NewTenantCtxMiddleware().Handle,
 	}
 }

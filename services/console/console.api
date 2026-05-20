@@ -58,12 +58,10 @@ type NamespaceListResp {
 }
 
 type CreateNamespaceReq {
-	NsSlug             string   `json:"ns_slug"`
-	DisplayName        string   `json:"display_name"`
-	Description        string   `json:"description,optional"`
-	DefaultChannelSlug string   `json:"default_channel_slug,optional"`
-	Tags               []string `json:"tags,optional"`
-	QuotaPromptsMax    int64    `json:"quota_prompts_max,optional"`
+	DisplayName     string   `json:"display_name"`
+	Description     string   `json:"description,optional"`
+	Tags            []string `json:"tags,optional"`
+	QuotaPromptsMax int64    `json:"quota_prompts_max,optional"`
 }
 
 type PatchNamespaceReq {
@@ -77,6 +75,105 @@ type PatchNamespaceReq {
 type ErrorBody {
 	Code    string `json:"code"`
 	Message string `json:"message"`
+}
+
+// --- Prompts (PRM) under /me/namespaces/:nsSlug/prompts
+type PromptSummary {
+	PromptKey   string   `json:"prompt_key"`
+	Title       string   `json:"title,optional"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+
+type PromptListResp {
+	Items []PromptSummary `json:"items"`
+	Total int64           `json:"total"`
+}
+
+type ListPromptsReq {
+	Page     int64  `form:"page,optional"`
+	PageSize int64  `form:"page_size,optional"`
+	Q        string `form:"q,optional"`
+}
+
+type PromptDetail {
+	PromptKey   string   `json:"prompt_key"`
+	Title       string   `json:"title,optional"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+	DraftBody   string   `json:"draft_body"`
+	DraftSchema string   `json:"draft_schema,optional"`
+	UpdatedAt   string   `json:"updated_at"`
+}
+
+type CreatePromptReq {
+	Title       string   `json:"title"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+}
+
+type PatchPromptReq {
+	Title       string   `json:"title,optional"`
+	Tags        []string `json:"tags,optional"`
+	OwnerUserId string   `json:"owner_user_id,optional"`
+}
+
+type PutDraftReq {
+	Body   string `json:"body"`
+	Schema string `json:"schema,optional"`
+}
+
+type DraftResp {
+	Body      string   `json:"body"`
+	Schema    string   `json:"schema,optional"`
+	Warnings  []string `json:"warnings,optional"`
+	UpdatedAt string   `json:"updated_at"`
+}
+
+type CreateVersionReq {
+	ChangeNote string `json:"change_note,optional"`
+	Version    string `json:"version,optional"`
+}
+
+type PromptVersionItem {
+	Id              string `json:"id"`
+	Version         string `json:"version"`
+	ChangeNote      string `json:"change_note,optional"`
+	CreatedByUserId string `json:"created_by_user_id"`
+	CreatedAt       string `json:"created_at"`
+}
+
+type ListVersionsReq {
+	Page     int64  `form:"page,optional"`
+	PageSize int64  `form:"page_size,optional"`
+	Q        string `form:"q,optional"`
+}
+
+type PromptVersionListResp {
+	Items []PromptVersionItem `json:"items"`
+	Total int64               `json:"total"`
+}
+
+type DiffVersionsReq {
+	VersionA string `form:"version_a"`
+	VersionB string `form:"version_b"`
+}
+
+type VersionDiffResp {
+	BodyDiff   string `json:"body_diff"`
+	SchemaDiff string `json:"schema_diff"`
+}
+
+type ChannelPointerResp {
+	Channel   string `json:"channel"`
+	VersionId string `json:"version_id"`
+	Version   string `json:"version"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type PatchChannelPointerReq {
+	VersionId string `json:"version_id"`
 }
 
 @server (
@@ -133,5 +230,49 @@ service console-api {
 
 	@handler RestoreNamespace
 	post /namespaces/:nsSlug/restore returns (NamespaceDetail)
+}
+
+@server (
+	prefix:     /api/v1/me
+	group:      prompt
+	jwt:        JwtAuth
+	middleware: TenantCtx
+)
+service console-api {
+	@handler ListPrompts
+	get /namespaces/:nsSlug/prompts (ListPromptsReq) returns (PromptListResp)
+
+	@handler CreatePrompt
+	post /namespaces/:nsSlug/prompts (CreatePromptReq) returns (PromptDetail)
+
+	@handler GetPrompt
+	get /namespaces/:nsSlug/prompts/:promptKey returns (PromptDetail)
+
+	@handler PatchPrompt
+	patch /namespaces/:nsSlug/prompts/:promptKey (PatchPromptReq) returns (PromptDetail)
+
+	@handler DeletePrompt
+	delete /namespaces/:nsSlug/prompts/:promptKey returns (Empty)
+
+	@handler GetDraft
+	get /namespaces/:nsSlug/prompts/:promptKey/draft returns (DraftResp)
+
+	@handler PutDraft
+	put /namespaces/:nsSlug/prompts/:promptKey/draft (PutDraftReq) returns (DraftResp)
+
+	@handler CreateVersion
+	post /namespaces/:nsSlug/prompts/:promptKey/versions (CreateVersionReq) returns (PromptVersionItem)
+
+	@handler ListVersions
+	get /namespaces/:nsSlug/prompts/:promptKey/versions (ListVersionsReq) returns (PromptVersionListResp)
+
+	@handler DiffVersions
+	get /namespaces/:nsSlug/prompts/:promptKey/versions/diff (DiffVersionsReq) returns (VersionDiffResp)
+
+	@handler GetChannelPointer
+	get /namespaces/:nsSlug/prompts/:promptKey/channels/:channel returns (ChannelPointerResp)
+
+	@handler PatchChannelPointer
+	patch /namespaces/:nsSlug/prompts/:promptKey/channels/:channel (PatchChannelPointerReq) returns (ChannelPointerResp)
 }
 

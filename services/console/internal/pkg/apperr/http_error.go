@@ -47,3 +47,7 @@ func Conflict(code, msg string) *HTTP {
 func TooMany(code, msg string) *HTTP {
 	return &HTTP{Status: 429, Code: code, Message: msg}
 }
+
+func Internal(code, msg string) *HTTP {
+	return &HTTP{Status: 500, Code: code, Message: msg}
+}

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ApiError } from "@/api/client";
 import { me, type MeResp } from "@/api/user";
+import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
+import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -61,6 +63,24 @@ onMounted(() => {
       </div>
     </section>
 
+    <section class="card" aria-labelledby="appearance-heading">
+      <h2 id="appearance-heading" class="card-k">
+        {{ t("workspace.settingsAppearanceHeading") }}
+      </h2>
+
+      <div class="pref-list">
+        <div class="pref-row">
+          <span class="pref-label">{{ t("workspace.settingsLanguageLabel") }}</span>
+          <LocaleSwitcher />
+        </div>
+
+        <div class="pref-row">
+          <span class="pref-label">{{ t("workspace.settingsThemeLabel") }}</span>
+          <ThemeSwitcher />
+        </div>
+      </div>
+    </section>
+
     <p class="team">{{ t("workspace.settingsTeamHint") }}</p>
 
     <RouterLink class="back" :to="{ name: 'workspace' }">{{
@@ -103,6 +123,26 @@ onMounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--accent);
+}
+
+.pref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.pref-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.pref-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fg);
 }
 
 .state {

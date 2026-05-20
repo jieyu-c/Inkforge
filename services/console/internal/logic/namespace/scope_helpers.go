@@ -12,7 +12,8 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
-func findTenantNsOr404(ctx context.Context, svcCtx *svc.ServiceContext, tenantID, slug string,
+// FindTenantNsOr404 resolves a namespace within the tenant (shared by prompt and other NS-scoped APIs).
+func FindTenantNsOr404(ctx context.Context, svcCtx *svc.ServiceContext, tenantID, slug string,
 ) (*model.ConsoleNamespaces, error) {
 	row, err := svcCtx.ConsoleNamespacesModel.FindOneByTenantIdNsSlug(ctx, tenantID, slug)
 	switch {

@@ -17,10 +17,8 @@ export type NamespaceListResp = {
 };
 
 export type CreateNamespaceReq = {
-  ns_slug: string;
   display_name: string;
   description?: string;
-  default_channel_slug?: string;
   tags?: string[];
   quota_prompts_max?: number;
 };

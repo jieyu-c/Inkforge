@@ -37,9 +37,16 @@ type Config struct {
 		AuthPhoneBurst             int     `json:",default=20"`
 	}
 	// Namespace: personal-namespace defaults and quota merge (tenant_id mirrors user id in MVP).
-	Namespace struct {
+		Namespace struct {
 		DefaultQuotaPromptsPerNs int64 `json:",default=100"`
 		// PlatformQuotaPromptsCap: when >0, caps effective Prompt count max per NS (minimum with NS-level override).
 		PlatformQuotaPromptsCap int64 `json:",optional"` // zero = unset (no separate platform ceiling in merge)
+	}
+	// Prompt: draft validation (PRM-004 P-DEC-04) and version caps (P-DEC-05).
+	Prompt struct {
+		// DraftValidation: strict (default) rejects inconsistent placeholders/schema; warn returns 200 with warnings.
+		DraftValidation string `json:",default=strict"`
+		// MaxVersionsPerPrompt: when >0, refuse snapshot creation beyond this count per prompt_key.
+		MaxVersionsPerPrompt int64 `json:",default=100"`
 	}
 }

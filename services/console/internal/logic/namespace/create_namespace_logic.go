@@ -39,12 +39,16 @@ func (l *CreateNamespaceLogic) CreateNamespace(req *types.CreateNamespaceReq) (r
 	if err != nil {
 		return nil, err
 	}
-	slug, err := nslug.MustValidate(req.NsSlug)
+	displayName := strings.TrimSpace(req.DisplayName)
+	if displayName == "" {
+		return nil, apperr.BadRequest("INVALID_PAYLOAD", "display_name is required")
+	}
+	slug, err := nslug.AllocateUnique(displayName, func(candidate string) bool {
+		_, ferr := l.svcCtx.ConsoleNamespacesModel.FindOneByTenantIdNsSlug(l.ctx, tenantID, candidate)
+		return ferr == nil
+	})
 	if err != nil {
 		return nil, err
-	}
-	if req.DisplayName == "" {
-		return nil, apperr.BadRequest("INVALID_PAYLOAD", "display_name is required")
 	}
 	tagNull, err := nstags.ToNull(req.Tags)
 	if err != nil {
@@ -61,20 +65,17 @@ func (l *CreateNamespaceLogic) CreateNamespace(req *types.CreateNamespaceReq) (r
 		Id:                 uuid.NewString(),
 		TenantId:           tenantID,
 		NsSlug:             slug,
-		DisplayName:        req.DisplayName,
+		DisplayName:        displayName,
 		Description:        sql.NullString{},
 		Tags:               tagNull,
 		Status:             nsguard.StatusActive,
-		DefaultChannelSlug: sql.NullString{},
+		DefaultChannelSlug: sql.NullString{String: nslug.DefaultChannelSlug, Valid: true},
 		ArchivedAt:         sql.NullTime{},
 		QuotaPromptsMax:    quota,
 		PromptCount:        0,
 	}
 	if req.Description != "" {
 		row.Description = sql.NullString{String: strings.TrimSpace(req.Description), Valid: true}
-	}
-	if req.DefaultChannelSlug != "" {
-		row.DefaultChannelSlug = sql.NullString{String: strings.TrimSpace(req.DefaultChannelSlug), Valid: true}
 	}
 	if _, ierr := l.svcCtx.ConsoleNamespacesModel.Insert(l.ctx, &row); ierr != nil {
 		var mysqlErr *mysql.MySQLError

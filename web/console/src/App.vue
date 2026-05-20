@@ -7,7 +7,8 @@ import { RouterView } from "vue-router";
 </template>
 
 <style>
-:root {
+:root,
+[data-theme="dark"] {
   color-scheme: dark;
   --bg: #070a12;
   --bg-elevated: #0d111c;
@@ -37,7 +38,40 @@ import { RouterView } from "vue-router";
   --elev: var(--surface);
   --elev-2: var(--surface-2);
   --pill-hover: color-mix(in srgb, var(--muted) 12%, transparent);
+}
 
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f6fb;
+  --bg-elevated: #ffffff;
+  --surface: color-mix(in srgb, #ffffff 94%, #e2e8f0);
+  --surface-2: #eef2f9;
+  --accent: #6366f1;
+  --accent-dim: color-mix(in srgb, var(--accent) 32%, #f1f5f9);
+  --accent-glow: color-mix(in srgb, var(--accent) 28%, transparent);
+  --border: color-mix(in srgb, var(--accent) 10%, #cbd5e1 90%);
+  --border-dim: color-mix(in srgb, #64748b 16%, transparent);
+  --ink: #0f172a;
+  --muted: #64748b;
+  --danger: #dc2626;
+  --ok: #16a34a;
+  --shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 8%, transparent),
+    0 18px 40px rgba(15, 23, 42, 0.08);
+
+  --bg-canvas: var(--bg);
+  --fg: var(--ink);
+  --fg-muted: var(--muted);
+  --fg-soft: color-mix(in srgb, var(--muted) 82%, transparent);
+  --border-subtle: color-mix(in srgb, #cbd5e1 72%, transparent);
+  --border-faint: color-mix(in srgb, #e2e8f0 88%, transparent);
+  --border-strong: color-mix(in srgb, #64748b 24%, var(--border-dim));
+  --accent-soft: color-mix(in srgb, var(--accent) 35%, transparent);
+  --elev: var(--surface);
+  --elev-2: var(--surface-2);
+  --pill-hover: color-mix(in srgb, var(--muted) 8%, transparent);
+}
+
+:root {
   font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.5;
   background-color: var(--bg);
@@ -66,6 +100,20 @@ body {
     var(--bg);
 }
 
+[data-theme="light"] body {
+  background: radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      color-mix(in srgb, #c7d2fe 55%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 100% 100%,
+      color-mix(in srgb, #dbeafe 45%, transparent),
+      transparent 45%
+    ),
+    var(--bg);
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -85,6 +133,10 @@ body::before {
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 85% 70% at 50% 40%, black 15%, transparent 75%);
   opacity: 0.55;
+}
+
+[data-theme="light"] body::before {
+  opacity: 0.22;
 }
 
 #app {

@@ -4,19 +4,10 @@ import { setAppLocale } from "@/i18n";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-const props = withDefaults(
-  defineProps<{
-    /** `inline`: sits in nav / forms. `corner`: absolute overlay for centered auth cards. */
-    variant?: "inline" | "corner";
-  }>(),
-  { variant: "inline" },
-);
-
 const { locale, t } = useI18n();
 
 const rootClass = computed(() => ({
   "locale-switcher": true,
-  "locale-switcher--corner": props.variant === "corner",
 }));
 
 function pick(next: AppLocale) {
@@ -69,13 +60,6 @@ function pick(next: AppLocale) {
     0 1px 14px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-
-.locale-switcher--corner {
-  position: absolute;
-  top: calc(1rem + env(safe-area-inset-top, 0px));
-  right: calc(1rem + env(safe-area-inset-right, 0px));
-  z-index: 40;
 }
 
 .locale-switcher__seg {

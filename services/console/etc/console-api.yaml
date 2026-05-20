@@ -39,3 +39,7 @@ RateLimit:
 Namespace:
   DefaultQuotaPromptsPerNs: 500
   PlatformQuotaPromptsCap: 0
+
+Prompt:
+  DraftValidation: strict
+  MaxVersionsPerPrompt: 100

@@ -1,6 +1,6 @@
 import ConsoleLayout from "@/layouts/ConsoleLayout.vue";
 import { useAuthStore } from "@/stores/auth";
-import ComingSoonView from "@/views/console/ComingSoonView.vue";
+import PromptDetailView from "@/views/console/PromptDetailView.vue";
 import SettingsView from "@/views/console/SettingsView.vue";
 import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
@@ -46,10 +46,14 @@ const routes = [
       },
       {
         path: "prompts",
-        name: "console-prompts",
-        component: ComingSoonView,
+        redirect: { name: "workspace" },
+      },
+      {
+        path: "prompts/:promptKey",
+        name: "console-prompt-detail",
+        component: PromptDetailView,
         meta: {
-          titleI18nKey: "workspace.comingSoonPromptsTitle",
+          titleI18nKey: "prompts.pageTitle",
         },
       },
       {

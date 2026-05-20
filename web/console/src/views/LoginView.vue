@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ApiError } from "@/api/client";
-import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
 import { useAuthStore } from "@/stores/auth";
 import {
   canonicalPhone,
@@ -65,7 +64,6 @@ async function submit() {
 
 <template>
   <div class="shell">
-    <LocaleSwitcher variant="corner" />
     <div class="panel">
       <div class="glow" aria-hidden="true" />
       <div class="card">

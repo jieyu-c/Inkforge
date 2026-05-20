@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ApiError } from "@/api/client";
-import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
 import InkforgeLogoMark from "@/components/InkforgeLogoMark.vue";
 import { me, type MeResp } from "@/api/user";
 import { useAuthStore } from "@/stores/auth";
@@ -69,13 +68,6 @@ async function onLogout() {
         </RouterLink>
 
         <div class="nav-links">
-          <RouterLink
-            v-if="auth.isAuthenticated"
-            class="nav-a"
-            :to="{ name: 'workspace' }"
-          >
-            {{ t("home.navWorkspace") }}
-          </RouterLink>
           <a class="nav-a" href="#features">{{ t("home.navFeatures") }}</a>
           <a class="nav-a" href="#session">{{ t("home.navSession") }}</a>
           <a
@@ -88,10 +80,11 @@ async function onLogout() {
           </a>
         </div>
 
-        <LocaleSwitcher variant="inline" class="locale-in-nav" />
-
         <div class="nav-actions">
           <template v-if="auth.isAuthenticated">
+            <RouterLink class="btn btn-workspace" :to="{ name: 'workspace' }">
+              {{ t("home.navWorkspace") }}
+            </RouterLink>
             <button
               type="button"
               class="btn btn-outline"
@@ -400,12 +393,37 @@ async function onLogout() {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
-.locale-in-nav {
-  flex-shrink: 0;
+.btn-workspace {
+  background: linear-gradient(
+    145deg,
+    #818cf8 0%,
+    #6366f1 52%,
+    #4f46e5 100%
+  );
+  color: #fafafa;
+  border: 1px solid color-mix(in srgb, #fff 42%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 38%, transparent) inset,
+    0 2px 14px color-mix(in srgb, var(--accent) 38%, transparent);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.btn-workspace:hover {
+  filter: brightness(1.06);
+  text-decoration: none;
+}
+
+.btn-workspace.router-link-active {
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 38%, transparent) inset,
+    0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 2px 14px color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
 /* Shared buttons —— */
